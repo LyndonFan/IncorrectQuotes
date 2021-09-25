@@ -42,9 +42,9 @@ def correct_spellings(txt):
 
 
 def _html_to_quote(q, preserve_tags=False):
-    if q.count("<a href=") != 1:
+    if q.count("<a href=") > 1:
         return ""
-    q = q[: q.index("<a href=")]
+    q = re.sub("<a href.*", "", q)
     q = re.sub("</?div.*?>", "\n", q)
     q = re.sub("(</p>(\n)*<p.*?>)|(</span>(\n)*<span.*?>)", "\n", q)
     q = re.sub("\n+", "\n", q)
@@ -70,8 +70,8 @@ def clean(df):
             for ts in df.original_tags
         ]
     ]
+    df["quote"] = df["quote"].apply(lambda x: re.sub("<a href=.*</a>$", "", x))
     df["raw"] = df["quote"]
-    df["raw"] = df["raw"].apply(lambda x: re.sub("<a href=.*</a>$", "", x))
     df["quote"] = df["quote"].apply(_html_to_quote)
     df = df[df["quote"].apply(_is_quote)]
     return df
