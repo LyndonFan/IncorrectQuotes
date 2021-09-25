@@ -134,4 +134,9 @@ dmypy.json
 # ----------------------------------------------------------------
 # default stuff above
 
+# webdriver
 *chromedriver
+
+# hide actual scrapped data / quotes
+scraping/scrapped_data.json
+data/quotes.json
