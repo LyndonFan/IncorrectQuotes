@@ -139,4 +139,6 @@ dmypy.json
 
 # hide actual scrapped data / quotes
 scraping/scrapped_data.json
+scraping/new_scrapping_secrets.json
 data/quotes.json
+_testing/*
