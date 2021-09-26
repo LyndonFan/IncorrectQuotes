@@ -19,7 +19,7 @@ async def async_scrap_urls(
 ) -> List[Dict[str, Any]]:
     input_coroutines = [async_scrap_url(*xs) for xs in inp]
     ress = await asyncio.gather(*input_coroutines, return_exceptions=True)
-    res = [x for xs in ress for x in xs if x["trail"] == []]
+    res = [x for xs in ress for x in xs]
     return res
 
 
