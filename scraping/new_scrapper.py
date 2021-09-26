@@ -3,14 +3,15 @@ import requests
 import json, re, time
 from fake_useragent import UserAgent
 from datetime import datetime
-import sys
+import sys, os
+import asyncio
 
 
 def right_format(x: str) -> bool:
     return re.match("^https:\/\/[^\.]*\.tumblr\.com(\/(archive\/?)?)?$", x)
 
 
-def scrap_url(
+async def scrap_url(
     url: str, last_visited: Optional[datetime] = None
 ) -> List[Dict[str, Any]]:
     assert right_format(url), f"The input isn't a proper link to a tumblr blog:\n{url}"
@@ -58,8 +59,8 @@ def scrap_url(
         new_posts = response.json()["response"]["posts"]  # length <= 20 by API
         posts += new_posts
         if care_date:
-            oldest_timestamp = min(p["timestamp"])
-        time.sleep(1)
+            oldest_timestamp = min(p["timestamp"] for p in new_posts)
+        await asyncio.sleep(0.5)
 
     return posts
 
@@ -68,18 +69,21 @@ if __name__ == "__main__":
     args: List[str] = sys.argv[1:]
     actual_args: List[str] = []
     for x in args:
-        if os.path.exists(x) and x.split(".")[-1]=="json":
+        if os.path.exists(x) and x.split(".")[-1] == "json":
             with open(x, "r") as f:
                 jsn = json.load(f)
             try:
-                urls = [r['url'] for r in jsn]
+                urls = [r["url"] for r in jsn]
                 actual_args += [url for url in urls if right_format(url)]
+            except:
+                pass
         else:
-            if right_format(x): actual_args.append(x)
+            if right_format(x):
+                actual_args.append(x)
     for u in actual_args:
         print("Scraping", u, "...")
         try:
-            posts = scrap_url(u)
+            posts = asyncio.get_event_loop().run_until_complete(scrap_url(u))[0]
             if len(posts) > 0:
                 domain = posts[0]["blogName"].replace(" ", "_").replace("/", "-")
                 with open(f"../_testing/{domain}.json", "w+") as f:
