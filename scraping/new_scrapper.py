@@ -6,6 +6,8 @@ from datetime import datetime
 import sys, os
 import asyncio
 
+curr_folder: str = os.path.dirname(__file__)
+
 
 def right_format(x: str) -> bool:
     return re.match("^https:\/\/[^\.]*\.tumblr\.com(\/(archive\/?)?)?$", x)
@@ -16,10 +18,7 @@ async def scrap_url(
 ) -> List[Dict[str, Any]]:
     assert right_format(url), f"The input isn't a proper link to a tumblr blog:\n{url}"
     ua = UserAgent()
-    with open(
-        "/Users/lyndonf/Desktop/IncorrectQuotes/scraping/new_scrapping_secrets.json",
-        "r",
-    ) as f:
+    with open(os.path.join(curr_folder, "new_scrapping_secrets.json"), "r",) as f:
         headers: Dict[str, str] = json.load(f)
     headers["user-agent"] = ua.random
     headers["origin"] = url
@@ -28,7 +27,7 @@ async def scrap_url(
     domain: str = url.split(".tumblr.com")[0].replace("https://", "")
 
     params: Dict[str, str] = {
-        "fields[blogs]": "posts",
+        "fields[blogs]": "title",
         "npf": "true",
         "reblog_info": "true",
     }
