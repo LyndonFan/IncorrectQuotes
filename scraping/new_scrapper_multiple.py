@@ -43,3 +43,18 @@ if __name__ == "__main__":
     )
     with open("new_scrapped_data.json", "w+") as f:
         json.dump(results, f)
+    with open("../data/sources.json", "r") as f:
+        sources = json.load(f)
+    rev_lookup: Dict[str, int] = {r["url"]: i for i, r in enumerate(sources)}
+    now_timestamp: float = datetime.now().timestamp()
+    for r in jsn:
+        u: str = r["url"]
+        if r["url"] in rev_lookup:
+            sources[rev_lookup[u]]["last_visited"] = now_timestamp
+        else:
+            sources.append(
+                {"url": u, "last_visited": now_timestamp, "universe": r["universe"]}
+            )
+    with open("../data/sources.json", "w") as f:
+        json.dump(sources, f, indent=4)
+
