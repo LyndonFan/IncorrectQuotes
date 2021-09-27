@@ -14,8 +14,8 @@ def get_quotes(df):
 
 if __name__ == "__main__":
     with open("../scraping/scrapped_data.json", "r") as f:
-        df = json.load(f)
-    df = get_quotes(df)
+        jsn = json.load(f)
+    df = get_quotes(jsn)
     jsn = df.to_json(orient="records")  # result is a string
     with open("../data/quotes.json", "w+") as f:
         f.write(jsn)
