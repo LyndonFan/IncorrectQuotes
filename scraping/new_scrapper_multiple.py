@@ -4,11 +4,7 @@ from datetime import datetime
 import json, re, time
 from new_scrapper import right_format, scrap_url
 from new_scrapper_preprocess import preprocess
-
-
-async def async_preprocess(posts: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    res = await preprocess(posts)
-    return res
+import sys
 
 
 async def async_scrap_url(
@@ -17,7 +13,7 @@ async def async_scrap_url(
     if not right_format(url):
         return []
     res = await scrap_url(url, last_visited)
-    res = await async_preprocess(res)
+    res = preprocess(res)
     return res
 
 
@@ -27,20 +23,28 @@ async def async_scrap_urls(
     inp: List[Tuple[str, Optional[float]]]
 ) -> List[Dict[str, Any]]:
     input_coroutines = [async_scrap_url(*xs) for xs in inp]
-    ress = await asyncio.gather(*input_coroutines, return_exceptions=True)
+    ress = await asyncio.gather(*input_coroutines)
     res = [x for xs in ress for x in xs]
     return res
 
 
 if __name__ == "__main__":
+    args = sys.argv[1:]
+    testing: bool = len(args) > 0 and "test" in args[0]
     with open("links.json", "r") as f:
         jsn: List[Dict[str, Any]] = json.load(f)
     inputs: List[Tuple[str, Optional[float]]] = [
         (r["url"], (r["last_visited"] if "last_visited" in r else None)) for r in jsn
     ]
+    if testing:
+        print("Just testing program")
+        inputs = inputs[:5]
     results: List[Dict[str, Any]] = asyncio.get_event_loop().run_until_complete(
         async_scrap_urls(inputs)
     )
+    if testing:
+        wait = input("Done scraping")
+        exit()
     with open("new_scrapped_data.json", "w+") as f:
         json.dump(results, f)
     with open("../data/sources.json", "r") as f:
