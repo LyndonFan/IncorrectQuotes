@@ -3,6 +3,12 @@ import asyncio
 from datetime import datetime
 import json, re, time
 from new_scrapper import right_format, scrap_url
+from new_scrapper_preprocess import preprocess
+
+
+async def async_preprocess(posts: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    res = await preprocess(posts)
+    return res
 
 
 async def async_scrap_url(
@@ -11,9 +17,12 @@ async def async_scrap_url(
     if not right_format(url):
         return []
     res = await scrap_url(url, last_visited)
+    res = await async_preprocess(res)
     return res
 
 
+# doesn't matter if preprocess before/after merge
+# similarly fast in testing (w/in same magnitude, and < 1e-4 !)
 async def async_scrap_urls(
     inp: List[Tuple[str, Optional[datetime]]]
 ) -> List[Dict[str, Any]]:

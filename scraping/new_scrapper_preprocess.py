@@ -5,12 +5,10 @@ import json, re, time
 
 
 def can_keep(post: Dict[str, Any]) -> bool:
-    if "asking_url" in post or "source_url" in post:
-        # first is a Q&A -- hard to extract/format
-        # second is reblog
-        return False
-    if post["trail"] != []:  # possible reblog
-        return False
+    return not ("asking_url" in post or "source_url" in post) and post["trail"] == []
+    # first is a Q&A -- hard to extract/format
+    # second is reblog
+    # third is possible reblog from another page
 
 
 keep_tags: Set[str] = {
@@ -29,3 +27,6 @@ keep_tags: Set[str] = {
     "id_string",  # similar/same as "id"
 }
 
+
+def preprocess(posts: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    return [{k: r[k] for k in keep_tags if k in r} for r in posts if can_keep(r)]
