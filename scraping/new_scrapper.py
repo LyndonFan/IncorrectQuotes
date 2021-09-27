@@ -13,8 +13,9 @@ def right_format(x: str) -> bool:
     return re.match("^https:\/\/[^\.]*\.tumblr\.com(\/(archive\/?)?)?$", x)
 
 
+# last_visited is timestamp
 async def scrap_url(
-    url: str, last_visited: Optional[datetime] = None
+    url: str, last_visited: Optional[float] = None
 ) -> List[Dict[str, Any]]:
     assert right_format(url), f"The input isn't a proper link to a tumblr blog:\n{url}"
     ua = UserAgent()
@@ -33,8 +34,8 @@ async def scrap_url(
     }
     care_date: bool = True if last_visited is not None else False
     if care_date:
-        target_timestamp: int = last_visited.timestamp()
-        oldest_timestamp: int = target_timestamp + 1
+        target_timestamp: float = last_visited
+        oldest_timestamp: float = target_timestamp + 1
 
     posts: List[Dict[str, Any]] = []
     new_posts: List[Dict[str, Any]] = [{}]

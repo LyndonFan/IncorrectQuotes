@@ -24,7 +24,7 @@ async def async_scrap_url(
 # doesn't matter if preprocess before/after merge
 # similarly fast in testing (w/in same magnitude, and < 1e-4 !)
 async def async_scrap_urls(
-    inp: List[Tuple[str, Optional[datetime]]]
+    inp: List[Tuple[str, Optional[float]]]
 ) -> List[Dict[str, Any]]:
     input_coroutines = [async_scrap_url(*xs) for xs in inp]
     ress = await asyncio.gather(*input_coroutines, return_exceptions=True)
@@ -34,8 +34,8 @@ async def async_scrap_urls(
 
 if __name__ == "__main__":
     with open("links.json", "r") as f:
-        jsn = json.load(f)
-    inputs: List[Tuple[str, Optional[datetime]]] = [
+        jsn: List[Dict[str, Any]] = json.load(f)
+    inputs: List[Tuple[str, Optional[float]]] = [
         (r["url"], (r["last_visited"] if "last_visited" in r else None)) for r in jsn
     ]
     results: List[Dict[str, Any]] = asyncio.get_event_loop().run_until_complete(
